@@ -32,11 +32,8 @@ let main argv =
         parser.add_OnHeartbeat MessagePrinter.OnHeartbeat
         parser.add_OnDescribeRecord MessagePrinter.OnDescribeRecord
 
-        async {
-            Task.WhenAll(parser.DoParseAsync(connector.Reader), connector.DoReceiveAsync())
-            |> Async.AwaitTask
-            |> ignore
-        }
+        Task.WhenAll(parser.DoParseAsync(connector.Reader), connector.DoReceiveAsync())
+        |> Async.AwaitTask
         |> Async.RunSynchronously
     | :? NotParsed<Options> as notParsed -> printfn $"{notParsed.Errors}"
     | _ -> failwith "Something went wrong"
