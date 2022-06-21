@@ -21,24 +21,23 @@ module MessagePrinter =
 
 [<EntryPoint>]
 let main argv =
-    async {
-        match Parser.Default.ParseArguments<Options>(argv) with
-        | :? Parsed<Options> as parsed ->
-            let connector = ConnectorFactory.CreateConnector(parsed.Value.address)
-            let parser = QtpBinaryParser()
+    match Parser.Default.ParseArguments<Options>(argv) with
+    | :? Parsed<Options> as parsed ->
+        let connector =
+            ConnectorFactory.CreateConnector(parsed.Value.address)
 
-            parser.add_OnError MessagePrinter.OnError
-            parser.add_OnHeartbeat MessagePrinter.OnHeartbeat
-            parser.add_OnDescribeRecord MessagePrinter.OnDescribeRecord
+        let parser = QtpBinaryParser()
 
-            do!
-                Task.WhenAll(parser.DoParseAsync(connector.Reader), connector.DoReceiveAsync())
-                |> Async.AwaitTask
-        | :? NotParsed<Options> as notParsed -> printfn $"{notParsed.Errors}"
-        | _ -> failwith "Something went wrong"
+        parser.add_OnError MessagePrinter.OnError
+        parser.add_OnHeartbeat MessagePrinter.OnHeartbeat
+        parser.add_OnDescribeRecord MessagePrinter.OnDescribeRecord
 
-        return 0
-    }
-    |> Async.StartAsTask
-    |> Async.AwaitTask
-    |> Async.RunSynchronously
+        async {
+            Task.WhenAll(parser.DoParseAsync(connector.Reader), connector.DoReceiveAsync())
+            |> Async.AwaitTask
+            |> ignore
+        }
+        |> Async.RunSynchronously
+    | :? NotParsed<Options> as notParsed -> printfn $"{notParsed.Errors}"
+    | _ -> failwith "Something went wrong"
+    0
