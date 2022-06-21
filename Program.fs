@@ -16,8 +16,8 @@ type Options =
 
 module MessagePrinter =
     let OnError (ex: Exception) = printfn $"{ex.Message}"
-    let OnHeartbeat (message: HeartbeatMessage) = printfn $"{message.ToString()}"
-    let OnDescribeRecord (message: RecordDescription) = printfn $"{message.ToString()}"
+    let OnHeartbeat (message: HeartbeatMessage) = printfn $"{message}"
+    let OnDescribeRecord (message: RecordDescription) = printfn $"{message}"
 
 [<EntryPoint>]
 let main argv =
