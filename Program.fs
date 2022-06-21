@@ -24,8 +24,7 @@ let main argv =
     async {
         match Parser.Default.ParseArguments<Options>(argv) with
         | :? Parsed<Options> as parsed ->
-            let connector =
-                ConnectorFactory.CreateConnector(parsed.Value.address)
+            let connector = ConnectorFactory.CreateConnector(parsed.Value.address)
             let parser = QtpBinaryParser()
 
             parser.add_OnError MessagePrinter.OnError
@@ -35,9 +34,9 @@ let main argv =
             do!
                 Task.WhenAll(parser.DoParseAsync(connector.Reader), connector.DoReceiveAsync())
                 |> Async.AwaitTask
-        | :? NotParsed<Options> as notParsed -> failwithf $"{notParsed.Errors}"
+        | :? NotParsed<Options> as notParsed -> printfn $"{notParsed.Errors}"
         | _ -> failwith "Something went wrong"
-        
+
         return 0
     }
     |> Async.StartAsTask
